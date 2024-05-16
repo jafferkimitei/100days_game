@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Drawing Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            border: 2px solid #333;
+            background-color: #fff;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const socket = io();
+
+        let players = {};
+
+        socket.on('playerMove', (data) => {
+            players[data.id] = data.position;
+            draw();
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const position = { x, y };
+            socket.emit('playerMove', { id: socket.id, position });
+        });
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const id in players) {
+                const pos = players[id];
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+                ctx.fillStyle = '#ff3333'; // Red color for players
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    </script>
+</body>
+</html>
