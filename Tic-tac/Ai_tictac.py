@@ -16,14 +16,26 @@ class TicTacToeApp(App):
         self.difficulty_label = Label(text="Choose Difficulty Level:", font_size=24)
         self.layout.add_widget(self.difficulty_label)
         
-        self.easy_button = Button(text="Easy", on_press=self.set_easy_difficulty)
-        self.layout.add_widget(self.easy_button)
+        self.difficulty_buttons = GridLayout(cols=3, spacing=10)
+        self.easy_button = Button(text="Easy", font_size=20, on_press=self.set_easy_difficulty)
+        self.difficulty_buttons.add_widget(self.easy_button)
+        self.medium_button = Button(text="Medium", font_size=20, on_press=self.set_medium_difficulty)
+        self.difficulty_buttons.add_widget(self.medium_button)
+        self.hard_button = Button(text="Hard", font_size=20, on_press=self.set_hard_difficulty)
+        self.difficulty_buttons.add_widget(self.hard_button)
+        self.layout.add_widget(self.difficulty_buttons)
         
-        self.medium_button = Button(text="Medium", on_press=self.set_medium_difficulty)
-        self.layout.add_widget(self.medium_button)
+        self.status_label = Label(text="Your Turn", font_size=20)
+        self.layout.add_widget(self.status_label)
         
-        self.hard_button = Button(text="Hard", on_press=self.set_hard_difficulty)
-        self.layout.add_widget(self.hard_button)
+        self.game_board = GridLayout(cols=3, spacing=10)
+        self.buttons = []
+        for i in range(9):
+            button = Button(font_size=32, on_press=self.on_button_press)
+            self.buttons.append(button)
+            self.game_board.add_widget(button)
+        
+        self.layout.add_widget(self.game_board)
         
         return self.layout
     
@@ -40,18 +52,11 @@ class TicTacToeApp(App):
         self.start_game()
     
     def start_game(self):
-        self.layout.clear_widgets()
-        
-        grid_layout = GridLayout(cols=3, rows=3)
-        
-        self.buttons = []
-        for i in range(9):
-            button = Button(font_size=32, on_press=self.on_button_press)
-            self.buttons.append(button)
-            grid_layout.add_widget(button)
-        
-        self.layout.add_widget(grid_layout)
-        
+        self.difficulty_buttons.disabled = True
+        self.status_label.text = "Your Turn"
+        self.game_board.disabled = False
+        for button in self.buttons:
+            button.text = ''
         if self.current_player == 'O' and self.difficulty_level == 'Hard':
             self.hard_computer_move()
     
@@ -150,7 +155,7 @@ class TicTacToeApp(App):
     def check_winner(self, player):
         win_conditions = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Horizontal
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Vertical
+             [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Vertical
             [0, 4, 8], [2, 4, 6]              # Diagonal
         ]
         for condition in win_conditions:
@@ -163,6 +168,8 @@ class TicTacToeApp(App):
     
     def reset_board(self):
         self.board = [' ' for _ in range(9)]
+        self.difficulty_buttons.disabled = False
+        self.game_board.disabled = True
         for button in self.buttons:
             button.text = ''
     
