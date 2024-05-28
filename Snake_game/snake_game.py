@@ -2,8 +2,8 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.clock import Clock
 from kivy.uix.label import Label
-from kivy.core.window import Window  
 from kivy.graphics import Rectangle, Color
+from kivy.core.window import Window  
 import random
 
 class SnakePart(Widget):
@@ -34,8 +34,11 @@ class SnakeGame(Widget):
         self.snake = []
         self.food = None
         self.direction = 'right'
+        self.score = 0
         self.create_snake()
         self.create_food()
+        self.score_label = Label(text=f"Score: {self.score}", pos=(10, Window.height - 40))
+        self.add_widget(self.score_label)
         Clock.schedule_interval(self.update, 0.2)
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_key_down)
@@ -56,7 +59,10 @@ class SnakeGame(Widget):
             self.add_widget(part)
 
     def create_food(self):
-        food_pos = (random.randint(0, 29) * 20, random.randint(0, 29) * 20)
+        while True:
+            food_pos = (random.randint(0, 29) * 20, random.randint(0, 29) * 20)
+            if food_pos not in [part.pos for part in self.snake]:
+                break
         self.food = Food(food_pos)
         self.add_widget(self.food)
 
@@ -73,7 +79,7 @@ class SnakeGame(Widget):
         elif self.direction == 'right':
             new_pos[0] += 20
         
-        if new_pos[0] < 0 or new_pos[0] >= 600 or new_pos[1] < 0 or new_pos[1] >= 600 or any(part.pos == tuple(new_pos) for part in self.snake):
+        if new_pos[0] < 0 or new_pos[0] >= Window.width or new_pos[1] < 0 or new_pos[1] >= Window.height or any(part.pos == tuple(new_pos) for part in self.snake):
             self.game_over()
             return
 
@@ -85,10 +91,13 @@ class SnakeGame(Widget):
             self.snake.append(SnakePart(self.snake[-1].pos))
             self.remove_widget(self.food)
             self.create_food()
+            self.score += 1
+            self.score_label.text = f"Score: {self.score}"
 
     def game_over(self):
         Clock.unschedule(self.update)
         self.add_widget(Label(text="Game Over", font_size=48, center=self.center))
+        self.add_widget(Label(text=f"Final Score: {self.score}", font_size=32, pos=(Window.width // 2 - 70, Window.height // 2 - 70)))
 
 class SnakeApp(App):
     def build(self):
