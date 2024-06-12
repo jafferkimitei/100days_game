@@ -1,7 +1,7 @@
 import pygame
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Test Window")
+pygame.display.set_caption("Play Window")
 running = True
 while running:
     for event in pygame.event.get():
